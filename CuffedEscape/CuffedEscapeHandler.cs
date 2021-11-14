@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="CuffedEscapeHandler.cs" company="Mistaken">
 // Copyright (c) Mistaken. All rights reserved.
 // </copyright>
@@ -61,10 +61,30 @@ namespace Mistaken.CuffedEscape
                     case Team.MTF:
                         Respawning.RespawnTickets.Singleton.GrantTickets(Respawning.SpawnableTeamType.ChaosInsurgency, 2);
                         player.SetRole(RoleType.ChaosConscript, Exiled.API.Enums.SpawnReason.Escaped, true);
+                        player.AddItem(ItemType.KeycardChaosInsurgency);
+                        player.AddItem(ItemType.GunLogicer);
+                        player.AddItem(ItemType.GunRevolver);
+                        player.AddItem(ItemType.ArmorHeavy);
+                        player.AddItem(ItemType.GrenadeHE);
+                        player.AddItem(ItemType.Adrenaline);
+                        player.AddItem(ItemType.Medkit);
+                        player.Ammo[ItemType.Ammo762x39] = 200;
+                        player.Ammo[ItemType.Ammo44cal] = 48;
                         break;
                     case Team.CHI:
                         Respawning.RespawnTickets.Singleton.GrantTickets(Respawning.SpawnableTeamType.NineTailedFox, 2);
                         player.SetRole(RoleType.NtfSpecialist, Exiled.API.Enums.SpawnReason.Escaped, true);
+                        player.AddItem(ItemType.KeycardNTFLieutenant);
+                        player.AddItem(ItemType.GunE11SR);
+                        player.AddItem(ItemType.GunRevolver);
+                        player.AddItem(ItemType.ArmorHeavy);
+                        player.AddItem(ItemType.GrenadeHE);
+                        player.AddItem(ItemType.Adrenaline);
+                        player.AddItem(ItemType.Medkit);
+                        player.AddItem(ItemType.Radio);
+                        player.Ammo[ItemType.Ammo556x45] = 160;
+                        player.Ammo[ItemType.Ammo44cal] = 48;
+                        player.Ammo[ItemType.Ammo9x19] = 40;
                         break;
                     default:
                         return;
