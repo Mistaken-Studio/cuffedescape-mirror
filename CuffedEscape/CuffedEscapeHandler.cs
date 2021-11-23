@@ -40,11 +40,11 @@ namespace Mistaken.CuffedEscape
                 return;
 
             if (ev.Player.HasItem(ItemType.KeycardO5))
-                ev.Player.RemoveItem(ev.Player.Items.First(i => i.Type == ItemType.KeycardChaosInsurgency || i.Type == ItemType.KeycardNTFLieutenant || i.Type == ItemType.KeycardFacilityManager || i.Type == ItemType.KeycardNTFCommander));
+                ev.Player.RemoveItem(ev.Player.Items.First(i => i.Type == ItemType.KeycardChaosInsurgency || i.Type == ItemType.KeycardNTFLieutenant || i.Type == ItemType.KeycardFacilityManager || i.Type == ItemType.KeycardNTFCommander || i.Type == ItemType.KeycardContainmentEngineer));
 
-            if (ev.Player.HasItem(ItemType.KeycardChaosInsurgency) || ev.Player.HasItem(ItemType.KeycardNTFLieutenant) || ev.Player.HasItem(ItemType.KeycardFacilityManager) || ev.Player.HasItem(ItemType.KeycardNTFCommander))
+            if (ev.Player.HasItem(ItemType.KeycardFacilityManager) || ev.Player.HasItem(ItemType.KeycardContainmentEngineer))
             {
-                ev.Player.RemoveItem(ev.Player.Items.First(i => i.Type == ItemType.KeycardChaosInsurgency || i.Type == ItemType.KeycardNTFLieutenant || i.Type == ItemType.KeycardFacilityManager || i.Type == ItemType.KeycardNTFCommander));
+                ev.Player.RemoveItem(ev.Player.Items.First(i => i.Type == ItemType.KeycardChaosInsurgency || i.Type == ItemType.KeycardNTFLieutenant || i.Type == ItemType.KeycardFacilityManager || i.Type == ItemType.KeycardNTFCommander || i.Type == ItemType.KeycardContainmentEngineer));
                 ev.Player.AddItem(ItemType.KeycardO5);
             }
         }
