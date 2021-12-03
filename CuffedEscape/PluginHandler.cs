@@ -26,7 +26,7 @@ namespace Mistaken.CuffedEscape
         public override PluginPriority Priority => PluginPriority.Default;
 
         /// <inheritdoc/>
-        public override Version RequiredExiledVersion => new Version(3, 0, 5);
+        public override Version RequiredExiledVersion => new Version(4, 1, 2);
 
         /// <inheritdoc/>
         public override void OnEnabled()
