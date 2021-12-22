@@ -39,13 +39,13 @@ namespace Mistaken.CuffedEscape
             if (ev.Reason != Exiled.API.Enums.SpawnReason.Escaped)
                 return;
 
-            if (ev.Player.HasItem(ItemType.KeycardO5))
-                ev.Player.RemoveItem(ev.Player.Items.First(i => i.Type == ItemType.KeycardChaosInsurgency || i.Type == ItemType.KeycardNTFLieutenant || i.Type == ItemType.KeycardFacilityManager || i.Type == ItemType.KeycardNTFCommander || i.Type == ItemType.KeycardContainmentEngineer));
-
             if (ev.Player.HasItem(ItemType.KeycardFacilityManager) || ev.Player.HasItem(ItemType.KeycardContainmentEngineer))
             {
-                ev.Player.RemoveItem(ev.Player.Items.First(i => i.Type == ItemType.KeycardChaosInsurgency || i.Type == ItemType.KeycardNTFLieutenant || i.Type == ItemType.KeycardFacilityManager || i.Type == ItemType.KeycardNTFCommander || i.Type == ItemType.KeycardContainmentEngineer));
-                ev.Player.AddItem(ItemType.KeycardO5);
+                foreach (var item in ev.Player.Items.Where(i => i.Type == ItemType.KeycardChaosInsurgency || i.Type == ItemType.KeycardNTFLieutenant || i.Type == ItemType.KeycardFacilityManager || i.Type == ItemType.KeycardNTFCommander || i.Type == ItemType.KeycardContainmentEngineer).ToArray())
+                {
+                    ev.Player.RemoveItem(item);
+                    ev.Player.AddItem(ItemType.KeycardO5);
+                }
             }
         }
 
