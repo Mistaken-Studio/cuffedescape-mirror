@@ -61,7 +61,7 @@ namespace Mistaken.CuffedEscape
                     case Team.MTF:
                         Respawning.RespawnTickets.Singleton.GrantTickets(Respawning.SpawnableTeamType.ChaosInsurgency, 2);
                         player.SetRole(RoleType.ChaosConscript, Exiled.API.Enums.SpawnReason.Escaped, true);
-                        player.Cuffer = null;
+                        player.RemoveHandcuffs();
                         player.AddItem(ItemType.KeycardChaosInsurgency);
                         player.AddItem(ItemType.GunLogicer);
                         player.AddItem(ItemType.GunRevolver);
@@ -75,7 +75,7 @@ namespace Mistaken.CuffedEscape
                     case Team.CHI:
                         Respawning.RespawnTickets.Singleton.GrantTickets(Respawning.SpawnableTeamType.NineTailedFox, 2);
                         player.SetRole(RoleType.NtfSpecialist, Exiled.API.Enums.SpawnReason.Escaped, true);
-                        player.Cuffer = null;
+                        player.RemoveHandcuffs();
                         player.AddItem(ItemType.KeycardNTFLieutenant);
                         player.AddItem(ItemType.GunE11SR);
                         player.AddItem(ItemType.GunRevolver);
