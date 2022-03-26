@@ -56,7 +56,7 @@ namespace Mistaken.CuffedEscape
             {
                 if (!player.IsCuffed)
                     return;
-                switch (player.Team)
+                switch (player.Role.Team)
                 {
                     case Team.MTF:
                         Respawning.RespawnTickets.Singleton.GrantTickets(Respawning.SpawnableTeamType.ChaosInsurgency, 2);
