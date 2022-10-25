@@ -7,28 +7,28 @@
 using System;
 using Exiled.API.Enums;
 using Exiled.API.Features;
+using Mistaken.Updater.API.Config;
 
 namespace Mistaken.CuffedEscape
 {
-    /// <inheritdoc/>
-    public class PluginHandler : Plugin<Config>
+    internal sealed class PluginHandler : Plugin<Config>, IAutoUpdateablePlugin
     {
-        /// <inheritdoc/>
         public override string Author => "Mistaken Devs";
 
-        /// <inheritdoc/>
         public override string Name => "CuffedEscape";
 
-        /// <inheritdoc/>
         public override string Prefix => "MCuffedEscape";
 
-        /// <inheritdoc/>
         public override PluginPriority Priority => PluginPriority.Default;
 
-        /// <inheritdoc/>
-        public override Version RequiredExiledVersion => new Version(5, 0, 0);
+        public override Version RequiredExiledVersion => new(5, 2, 2);
 
-        /// <inheritdoc/>
+        public AutoUpdateConfig AutoUpdateConfig => new()
+        {
+            Type = SourceType.GITLAB,
+            Url = "https://git.mistaken.pl/api/v4/projects/67",
+        };
+
         public override void OnEnabled()
         {
             Instance = this;
@@ -40,7 +40,6 @@ namespace Mistaken.CuffedEscape
             base.OnEnabled();
         }
 
-        /// <inheritdoc/>
         public override void OnDisabled()
         {
             API.Diagnostics.Module.OnDisable(this);

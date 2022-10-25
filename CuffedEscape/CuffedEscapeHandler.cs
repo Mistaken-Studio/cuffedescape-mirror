@@ -13,14 +13,14 @@ using UnityEngine;
 
 namespace Mistaken.CuffedEscape
 {
-    internal class CuffedEscapeHandler : Module
+    internal sealed class CuffedEscapeHandler : Module
     {
         public CuffedEscapeHandler(PluginHandler plugin)
             : base(plugin)
         {
         }
 
-        public override string Name => "CuffedEscape";
+        public override string Name => nameof(CuffedEscapeHandler);
 
         public override void OnEnable()
         {
@@ -41,7 +41,12 @@ namespace Mistaken.CuffedEscape
 
             if (ev.Player.HasItem(ItemType.KeycardFacilityManager) || ev.Player.HasItem(ItemType.KeycardContainmentEngineer))
             {
-                foreach (var item in ev.Player.Items.Where(i => i.Type == ItemType.KeycardChaosInsurgency || i.Type == ItemType.KeycardNTFLieutenant || i.Type == ItemType.KeycardFacilityManager || i.Type == ItemType.KeycardNTFCommander || i.Type == ItemType.KeycardContainmentEngineer).ToArray())
+                foreach (var item in ev.Player.Items.Where(x =>
+                x.Type == ItemType.KeycardChaosInsurgency ||
+                x.Type == ItemType.KeycardNTFLieutenant ||
+                x.Type == ItemType.KeycardFacilityManager ||
+                x.Type == ItemType.KeycardNTFCommander ||
+                x.Type == ItemType.KeycardContainmentEngineer).ToArray())
                 {
                     ev.Player.RemoveItem(item);
                     ev.Player.AddItem(ItemType.KeycardO5);
@@ -52,42 +57,45 @@ namespace Mistaken.CuffedEscape
         private void Server_RoundStarted()
         {
             // Escape
-            void Handler(Player player)
+            static void Handler(Player player)
             {
                 if (!player.IsCuffed)
                     return;
+
                 switch (player.Role.Team)
                 {
                     case Team.MTF:
-                        Respawning.RespawnTickets.Singleton.GrantTickets(Respawning.SpawnableTeamType.ChaosInsurgency, 2);
-                        player.SetRole(RoleType.ChaosConscript, Exiled.API.Enums.SpawnReason.Escaped, true);
-                        player.RemoveHandcuffs();
-                        player.AddItem(ItemType.KeycardChaosInsurgency);
-                        player.AddItem(ItemType.GunLogicer);
-                        player.AddItem(ItemType.GunRevolver);
-                        player.AddItem(ItemType.ArmorHeavy);
-                        player.AddItem(ItemType.GrenadeHE);
-                        player.AddItem(ItemType.Adrenaline);
-                        player.AddItem(ItemType.Medkit);
-                        player.Ammo[ItemType.Ammo762x39] = 200;
-                        player.Ammo[ItemType.Ammo44cal] = 48;
-                        break;
+                        {
+                            Respawning.RespawnTickets.Singleton.GrantTickets(Respawning.SpawnableTeamType.ChaosInsurgency, 2);
+                            player.SetRole(RoleType.ChaosConscript, Exiled.API.Enums.SpawnReason.Escaped, true);
+                            player.RemoveHandcuffs();
+                            player.AddItem(ItemType.KeycardChaosInsurgency);
+                            player.AddItem(ItemType.GunAK);
+                            player.AddItem(ItemType.GunRevolver);
+                            player.AddItem(ItemType.ArmorCombat);
+                            player.AddItem(ItemType.GrenadeHE);
+                            player.AddItem(ItemType.Medkit);
+                            player.Ammo[ItemType.Ammo762x39] = 120;
+                            player.Ammo[ItemType.Ammo44cal] = 36;
+                            break;
+                        }
+
                     case Team.CHI:
-                        Respawning.RespawnTickets.Singleton.GrantTickets(Respawning.SpawnableTeamType.NineTailedFox, 2);
-                        player.SetRole(RoleType.NtfSpecialist, Exiled.API.Enums.SpawnReason.Escaped, true);
-                        player.RemoveHandcuffs();
-                        player.AddItem(ItemType.KeycardNTFLieutenant);
-                        player.AddItem(ItemType.GunE11SR);
-                        player.AddItem(ItemType.GunRevolver);
-                        player.AddItem(ItemType.ArmorHeavy);
-                        player.AddItem(ItemType.GrenadeHE);
-                        player.AddItem(ItemType.Adrenaline);
-                        player.AddItem(ItemType.Medkit);
-                        player.AddItem(ItemType.Radio);
-                        player.Ammo[ItemType.Ammo556x45] = 160;
-                        player.Ammo[ItemType.Ammo44cal] = 48;
-                        player.Ammo[ItemType.Ammo9x19] = 40;
-                        break;
+                        {
+                            Respawning.RespawnTickets.Singleton.GrantTickets(Respawning.SpawnableTeamType.NineTailedFox, 2);
+                            player.SetRole(RoleType.NtfSpecialist, Exiled.API.Enums.SpawnReason.Escaped, true);
+                            player.RemoveHandcuffs();
+                            player.AddItem(ItemType.KeycardNTFLieutenant);
+                            player.AddItem(ItemType.GunE11SR);
+                            player.AddItem(ItemType.ArmorCombat);
+                            player.AddItem(ItemType.Radio);
+                            player.AddItem(ItemType.GrenadeHE);
+                            player.AddItem(ItemType.Medkit);
+                            player.Ammo[ItemType.Ammo556x45] = 120;
+                            player.Ammo[ItemType.Ammo9x19] = 40;
+                            break;
+                        }
+
                     default:
                         return;
                 }
