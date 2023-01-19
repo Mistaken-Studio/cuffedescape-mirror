@@ -26,58 +26,60 @@ internal sealed class CuffedEscapeHandler
     [PluginEvent(ServerEventType.RoundStart)]
     private void OnRoundStart()
     {
-        static void Handler(Player player)
+        InRange.Spawn(new Vector3(179.5f, 990, 32.5f), new Vector3(13, 20, 19)).OnEnter += OnEnter;
+        InRange.Spawn(new Vector3(174.5f, 990, 37), new Vector3(21, 20, 10)).OnEnter += OnEnter;
+    }
+
+    private void OnEnter(Player player)
+    {
+        Log.Debug("1");
+        if (!player.ReferenceHub.inventory.IsDisarmed())
+            return;
+
+        Log.Debug("2");
+        switch (player.Team)
         {
-            if (!player.ReferenceHub.inventory.IsDisarmed())
+            case Team.FoundationForces:
+                {
+                    Log.Debug("3");
+                    Respawning.RespawnTokensManager.GrantTokens(Respawning.SpawnableTeamType.ChaosInsurgency, 2);
+                    player.SetRole(RoleTypeId.ChaosConscript, RoleChangeReason.Escaped);
+                    DisarmedPlayers.Entries.RemoveAt(DisarmedPlayers.Entries.FindIndex(x => x.DisarmedPlayer == player.NetworkId));
+                    new DisarmedPlayersListMessage(DisarmedPlayers.Entries).SendToAuthenticated();
+                    player.AddItem(ItemType.KeycardChaosInsurgency);
+                    player.AddItem(ItemType.GunAK);
+                    player.AddItem(ItemType.GunRevolver);
+                    player.AddItem(ItemType.ArmorCombat);
+                    player.AddItem(ItemType.GrenadeHE);
+                    player.AddItem(ItemType.Medkit);
+                    player.AmmoBag[ItemType.Ammo762x39] = 120;
+                    player.AmmoBag[ItemType.Ammo44cal] = 36;
+                    player.ReferenceHub.inventory.SendAmmoNextFrame = true;
+                    break;
+                }
+
+            case Team.ChaosInsurgency:
+                {
+                    Log.Debug("4");
+                    Respawning.RespawnTokensManager.GrantTokens(Respawning.SpawnableTeamType.NineTailedFox, 2);
+                    player.SetRole(RoleTypeId.NtfSpecialist, RoleChangeReason.Escaped);
+                    DisarmedPlayers.Entries.RemoveAt(DisarmedPlayers.Entries.FindIndex(x => x.DisarmedPlayer == player.NetworkId));
+                    new DisarmedPlayersListMessage(DisarmedPlayers.Entries).SendToAuthenticated();
+                    player.AddItem(ItemType.KeycardNTFLieutenant);
+                    player.AddItem(ItemType.GunE11SR);
+                    player.AddItem(ItemType.ArmorCombat);
+                    player.AddItem(ItemType.Radio);
+                    player.AddItem(ItemType.GrenadeHE);
+                    player.AddItem(ItemType.Medkit);
+                    player.AmmoBag[ItemType.Ammo556x45] = 120;
+                    player.AmmoBag[ItemType.Ammo9x19] = 40;
+                    player.ReferenceHub.inventory.SendAmmoNextFrame = true;
+                    break;
+                }
+
+            default:
                 return;
-
-            switch (player.Team)
-            {
-                case Team.FoundationForces:
-                    {
-                        Respawning.RespawnTokensManager.GrantTokens(Respawning.SpawnableTeamType.ChaosInsurgency, 2);
-                        player.SetRole(RoleTypeId.ChaosConscript, RoleChangeReason.Escaped);
-                        DisarmedPlayers.Entries.RemoveAt(DisarmedPlayers.Entries.FindIndex(x => x.DisarmedPlayer == player.NetworkId));
-                        new DisarmedPlayersListMessage(DisarmedPlayers.Entries).SendToAuthenticated();
-                        player.AddItem(ItemType.KeycardChaosInsurgency);
-                        player.AddItem(ItemType.GunAK);
-                        player.AddItem(ItemType.GunRevolver);
-                        player.AddItem(ItemType.ArmorCombat);
-                        player.AddItem(ItemType.GrenadeHE);
-                        player.AddItem(ItemType.Medkit);
-                        player.AmmoBag[ItemType.Ammo762x39] = 120;
-                        player.AmmoBag[ItemType.Ammo44cal] = 36;
-                        player.ReferenceHub.inventory.SendAmmoNextFrame = true;
-                        break;
-                    }
-
-                case Team.ChaosInsurgency:
-                    {
-                        Respawning.RespawnTokensManager.GrantTokens(Respawning.SpawnableTeamType.NineTailedFox, 2);
-                        player.SetRole(RoleTypeId.NtfSpecialist, RoleChangeReason.Escaped);
-                        DisarmedPlayers.Entries.RemoveAt(DisarmedPlayers.Entries.FindIndex(x => x.DisarmedPlayer == player.NetworkId));
-                        new DisarmedPlayersListMessage(DisarmedPlayers.Entries).SendToAuthenticated();
-                        player.AddItem(ItemType.KeycardNTFLieutenant);
-                        player.AddItem(ItemType.GunE11SR);
-                        player.AddItem(ItemType.ArmorCombat);
-                        player.AddItem(ItemType.Radio);
-                        player.AddItem(ItemType.GrenadeHE);
-                        player.AddItem(ItemType.Medkit);
-                        player.AmmoBag[ItemType.Ammo556x45] = 120;
-                        player.AmmoBag[ItemType.Ammo9x19] = 40;
-                        player.ReferenceHub.inventory.SendAmmoNextFrame = true;
-                        break;
-                    }
-
-                default:
-                    return;
-            }
-
-            // RLogger.Log("ESCAPE", "ESCAPE", $"{player.PlayerToString()} has escaped");
         }
-
-        InRange.Spawn(new Vector3(179.5f, 990, 32.5f), new Vector3(13, 20, 19), Handler);
-        InRange.Spawn(new Vector3(174.5f, 990, 37), new Vector3(21, 20, 10), Handler);
     }
 
     [PluginEvent(ServerEventType.PlayerChangeRole)]
