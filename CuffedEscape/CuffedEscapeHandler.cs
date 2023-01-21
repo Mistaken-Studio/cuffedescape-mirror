@@ -1,106 +1,103 @@
-using System.Linq;
+using InventorySystem;
 using InventorySystem.Disarming;
-using Mistaken.API.Components;
+using InventorySystem.Items.Firearms;
+using InventorySystem.Items.Firearms.Attachments;
 using PlayerRoles;
 using PluginAPI.Core;
-using PluginAPI.Core.Attributes;
 using PluginAPI.Enums;
 using PluginAPI.Events;
+using System;
 using UnityEngine;
-using Utils.Networking;
 
 namespace Mistaken.CuffedEscape;
 
-internal sealed class CuffedEscapeHandler
+internal sealed class CuffedEscapeHandler : MonoBehaviour
 {
-    public CuffedEscapeHandler()
+    private void Update()
     {
-        EventManager.RegisterEvents(this);
+        foreach (var player in ReferenceHub.AllHubs)
+        {
+            if (player.roleManager.CurrentRole is not HumanRole role)
+                continue;
+
+            if ((role.FpcModule.Position - Escape.WorldPos).sqrMagnitude > 156.5f)
+                continue;
+
+            if (role.ActiveTime < 10f)
+                continue;
+
+            if (!player.inventory.IsDisarmed())
+                continue;
+
+            try
+            {
+                OnEscape(player, role);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
     }
 
-    ~CuffedEscapeHandler()
+    private void OnEscape(ReferenceHub player, HumanRole role)
     {
-        EventManager.UnregisterEvents(this);
-    }
-
-    [PluginEvent(ServerEventType.RoundStart)]
-    private void OnRoundStart()
-    {
-        InRange.Spawn(new Vector3(179.5f, 990, 32.5f), new Vector3(13, 20, 19)).OnEnter += OnEnter;
-        InRange.Spawn(new Vector3(174.5f, 990, 37), new Vector3(21, 20, 10)).OnEnter += OnEnter;
-    }
-
-    private void OnEnter(Player player)
-    {
-        Log.Debug("1");
-        if (!player.ReferenceHub.inventory.IsDisarmed())
-            return;
-
-        Log.Debug("2");
-        switch (player.Team)
+        switch (role.Team)
         {
             case Team.FoundationForces:
                 {
-                    Log.Debug("3");
                     Respawning.RespawnTokensManager.GrantTokens(Respawning.SpawnableTeamType.ChaosInsurgency, 2);
-                    player.SetRole(RoleTypeId.ChaosConscript, RoleChangeReason.Escaped);
-                    DisarmedPlayers.Entries.RemoveAt(DisarmedPlayers.Entries.FindIndex(x => x.DisarmedPlayer == player.NetworkId));
-                    new DisarmedPlayersListMessage(DisarmedPlayers.Entries).SendToAuthenticated();
-                    player.AddItem(ItemType.KeycardChaosInsurgency);
-                    player.AddItem(ItemType.GunAK);
-                    player.AddItem(ItemType.GunRevolver);
-                    player.AddItem(ItemType.ArmorCombat);
-                    player.AddItem(ItemType.GrenadeHE);
-                    player.AddItem(ItemType.Medkit);
-                    player.AmmoBag[ItemType.Ammo762x39] = 120;
-                    player.AmmoBag[ItemType.Ammo44cal] = 36;
-                    player.ReferenceHub.inventory.SendAmmoNextFrame = true;
+                    player.roleManager.ServerSetRole(RoleTypeId.ChaosConscript, RoleChangeReason.Escaped, RoleSpawnFlags.None);
+                    // new DisarmedPlayersListMessage(DisarmedPlayers.Entries).SendToAuthenticated();
+                    player.inventory.ServerAddItem(ItemType.KeycardChaosInsurgency);
+                    var firearm = player.inventory.ServerAddItem(ItemType.GunAK) as Firearm;
+                    firearm.Status = new FirearmStatus(
+                        0,
+                        FirearmStatusFlags.MagazineInserted,
+                        AttachmentsServerHandler.PlayerPreferences[player][ItemType.GunAK]);
+                    firearm._refillAmmo = true;
+                    firearm.ServerConfirmAcqusition();
+                    firearm = player.inventory.ServerAddItem(ItemType.GunRevolver) as Firearm;
+                    firearm.Status = new FirearmStatus(
+                        firearm.AmmoManagerModule.MaxAmmo,
+                        FirearmStatusFlags.MagazineInserted,
+                        AttachmentsServerHandler.PlayerPreferences[player][ItemType.GunRevolver]);
+                    firearm._refillAmmo = true;
+                    firearm.ServerConfirmAcqusition();
+                    player.inventory.ServerAddItem(ItemType.ArmorCombat);
+                    player.inventory.ServerAddItem(ItemType.GrenadeHE);
+                    player.inventory.ServerAddItem(ItemType.Medkit);
+                    player.inventory.ServerAddAmmo(ItemType.Ammo762x39, 120);
+                    player.inventory.ServerAddAmmo(ItemType.Ammo44cal, 36);
+                    EventManager.ExecuteEvent(ServerEventType.PlayerEscape, player, role.RoleTypeId);
                     break;
                 }
 
             case Team.ChaosInsurgency:
                 {
-                    Log.Debug("4");
                     Respawning.RespawnTokensManager.GrantTokens(Respawning.SpawnableTeamType.NineTailedFox, 2);
-                    player.SetRole(RoleTypeId.NtfSpecialist, RoleChangeReason.Escaped);
-                    DisarmedPlayers.Entries.RemoveAt(DisarmedPlayers.Entries.FindIndex(x => x.DisarmedPlayer == player.NetworkId));
-                    new DisarmedPlayersListMessage(DisarmedPlayers.Entries).SendToAuthenticated();
-                    player.AddItem(ItemType.KeycardNTFLieutenant);
-                    player.AddItem(ItemType.GunE11SR);
-                    player.AddItem(ItemType.ArmorCombat);
-                    player.AddItem(ItemType.Radio);
-                    player.AddItem(ItemType.GrenadeHE);
-                    player.AddItem(ItemType.Medkit);
-                    player.AmmoBag[ItemType.Ammo556x45] = 120;
-                    player.AmmoBag[ItemType.Ammo9x19] = 40;
-                    player.ReferenceHub.inventory.SendAmmoNextFrame = true;
+                    player.roleManager.ServerSetRole(RoleTypeId.NtfSpecialist, RoleChangeReason.Escaped, RoleSpawnFlags.None);
+                    // new DisarmedPlayersListMessage(DisarmedPlayers.Entries).SendToAuthenticated();
+                    player.inventory.ServerAddItem(ItemType.KeycardNTFLieutenant);
+                    var firearm = player.inventory.ServerAddItem(ItemType.GunE11SR) as Firearm;
+                    firearm.Status = new FirearmStatus(
+                        0,
+                        FirearmStatusFlags.MagazineInserted,
+                        AttachmentsServerHandler.PlayerPreferences[player][ItemType.GunE11SR]);
+                    firearm._refillAmmo = true;
+                    firearm.ServerConfirmAcqusition();
+                    player.inventory.ServerAddItem(ItemType.ArmorCombat);
+                    player.inventory.ServerAddItem(ItemType.Radio);
+                    player.inventory.ServerAddItem(ItemType.GrenadeHE);
+                    player.inventory.ServerAddItem(ItemType.Medkit);
+                    player.inventory.ServerAddAmmo(ItemType.Ammo556x45, 120);
+                    player.inventory.ServerAddAmmo(ItemType.Ammo9x19, 40);
+                    EventManager.ExecuteEvent(ServerEventType.PlayerEscape, player, role.RoleTypeId);
                     break;
                 }
 
             default:
                 return;
-        }
-    }
-
-    [PluginEvent(ServerEventType.PlayerChangeRole)]
-    private void OnPlayerChangeRole(Player player, PlayerRoleBase oldRole, RoleTypeId newRole, RoleChangeReason reason)
-    {
-        if (reason != RoleChangeReason.Escaped)
-            return;
-
-        if (player.Items.Any(x => x.ItemTypeId == ItemType.KeycardFacilityManager || x.ItemTypeId == ItemType.KeycardContainmentEngineer))
-        {
-            foreach (var item in player.Items.Where(x =>
-            x.ItemTypeId == ItemType.KeycardChaosInsurgency ||
-            x.ItemTypeId == ItemType.KeycardNTFLieutenant ||
-            x.ItemTypeId == ItemType.KeycardFacilityManager ||
-            x.ItemTypeId == ItemType.KeycardNTFCommander ||
-            x.ItemTypeId == ItemType.KeycardContainmentEngineer).ToArray())
-            {
-                player.ReferenceHub.inventory.UserInventory.Items.Remove(item.ItemSerial);
-                player.ReferenceHub.inventory.SendItemsNextFrame = true;
-                player.AddItem(ItemType.KeycardO5);
-            }
         }
     }
 }

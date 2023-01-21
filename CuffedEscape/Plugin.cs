@@ -1,5 +1,7 @@
-﻿using PluginAPI.Core.Attributes;
+﻿using PluginAPI.Core;
+using PluginAPI.Core.Attributes;
 using PluginAPI.Enums;
+using PluginAPI.Events;
 
 namespace Mistaken.CuffedEscape;
 
@@ -15,12 +17,17 @@ internal sealed class Plugin
     private void Load()
     {
         Instance = this;
-        new CuffedEscapeHandler();
+        EventManager.RegisterEvents(this);
     }
 
     [PluginUnload]
     private void Unload()
     {
+        EventManager.UnregisterEvents(this);
     }
+
+    [PluginEvent(ServerEventType.WaitingForPlayers)]
+    private void OnWaitingForPlayers()
+        => Server.Instance.GameObject.AddComponent<CuffedEscapeHandler>();
 }
 
