@@ -13,6 +13,19 @@ namespace Mistaken.CuffedEscape;
 
 internal sealed class CuffedEscapeHandler : MonoBehaviour
 {
+    private static void SetupWeapon(ReferenceHub player, Firearm firearm)
+    {
+        if (!AttachmentsServerHandler.PlayerPreferences.TryGetValue(player, out var value) || !value.TryGetValue(firearm.ItemTypeId, out uint attachments))
+            attachments = AttachmentsUtils.GetRandomAttachmentsCode(firearm.ItemTypeId);
+
+        FirearmStatusFlags firearmStatusFlags = FirearmStatusFlags.MagazineInserted;
+        if (firearm.HasAdvantageFlag(AttachmentDescriptiveAdvantages.Flashlight))
+            firearmStatusFlags |= FirearmStatusFlags.FlashlightEnabled;
+
+        firearm.ApplyAttachmentsCode(attachments, true);
+        firearm.Status = new FirearmStatus(firearm.AmmoManagerModule.MaxAmmo, firearmStatusFlags, firearm.GetCurrentAttachmentsCode());
+    }
+
     private void Update()
     {
         foreach (var player in ReferenceHub.AllHubs)
@@ -48,22 +61,9 @@ internal sealed class CuffedEscapeHandler : MonoBehaviour
                 {
                     Respawning.RespawnTokensManager.GrantTokens(Respawning.SpawnableTeamType.ChaosInsurgency, 2);
                     player.roleManager.ServerSetRole(RoleTypeId.ChaosConscript, RoleChangeReason.Escaped, RoleSpawnFlags.None);
-                    // new DisarmedPlayersListMessage(DisarmedPlayers.Entries).SendToAuthenticated();
                     player.inventory.ServerAddItem(ItemType.KeycardChaosInsurgency);
-                    var firearm = player.inventory.ServerAddItem(ItemType.GunAK) as Firearm;
-                    firearm.Status = new FirearmStatus(
-                        0,
-                        FirearmStatusFlags.MagazineInserted,
-                        AttachmentsServerHandler.PlayerPreferences[player][ItemType.GunAK]);
-                    firearm._refillAmmo = true;
-                    firearm.ServerConfirmAcqusition();
-                    firearm = player.inventory.ServerAddItem(ItemType.GunRevolver) as Firearm;
-                    firearm.Status = new FirearmStatus(
-                        firearm.AmmoManagerModule.MaxAmmo,
-                        FirearmStatusFlags.MagazineInserted,
-                        AttachmentsServerHandler.PlayerPreferences[player][ItemType.GunRevolver]);
-                    firearm._refillAmmo = true;
-                    firearm.ServerConfirmAcqusition();
+                    SetupWeapon(player, player.inventory.ServerAddItem(ItemType.GunAK) as Firearm);
+                    SetupWeapon(player, player.inventory.ServerAddItem(ItemType.GunRevolver) as Firearm);
                     player.inventory.ServerAddItem(ItemType.ArmorCombat);
                     player.inventory.ServerAddItem(ItemType.GrenadeHE);
                     player.inventory.ServerAddItem(ItemType.Medkit);
@@ -77,15 +77,8 @@ internal sealed class CuffedEscapeHandler : MonoBehaviour
                 {
                     Respawning.RespawnTokensManager.GrantTokens(Respawning.SpawnableTeamType.NineTailedFox, 2);
                     player.roleManager.ServerSetRole(RoleTypeId.NtfSpecialist, RoleChangeReason.Escaped, RoleSpawnFlags.None);
-                    // new DisarmedPlayersListMessage(DisarmedPlayers.Entries).SendToAuthenticated();
                     player.inventory.ServerAddItem(ItemType.KeycardNTFLieutenant);
-                    var firearm = player.inventory.ServerAddItem(ItemType.GunE11SR) as Firearm;
-                    firearm.Status = new FirearmStatus(
-                        0,
-                        FirearmStatusFlags.MagazineInserted,
-                        AttachmentsServerHandler.PlayerPreferences[player][ItemType.GunE11SR]);
-                    firearm._refillAmmo = true;
-                    firearm.ServerConfirmAcqusition();
+                    SetupWeapon(player, player.inventory.ServerAddItem(ItemType.GunE11SR) as Firearm);
                     player.inventory.ServerAddItem(ItemType.ArmorCombat);
                     player.inventory.ServerAddItem(ItemType.Radio);
                     player.inventory.ServerAddItem(ItemType.GrenadeHE);
